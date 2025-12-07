@@ -26,6 +26,7 @@ export const createSnippet = async (data: SnippetData): Promise<string> => {
   
   const docRef = await addDoc(collection(db, COLLECTION_NAME), {
     name: data.name,
+    description: data.description || '',
     code: data.code,
     author: data.author || '',
     createdAt: now,
@@ -55,6 +56,7 @@ export const getSnippet = async (id: string): Promise<Snippet | null> => {
   return {
     id: docSnap.id,
     name: data.name,
+    description: data.description,
     code: data.code,
     createdAt: data.createdAt.toDate(),
     updatedAt: data.updatedAt.toDate(),
@@ -74,6 +76,7 @@ export const getAllSnippets = async (): Promise<Snippet[]> => {
     return {
       id: doc.id,
       name: data.name,
+      description: data.description,
       code: data.code,
       createdAt: data.createdAt.toDate(),
       updatedAt: data.updatedAt.toDate(),
@@ -89,6 +92,7 @@ export const searchSnippets = async (searchTerm: string): Promise<Snippet[]> => 
   
   return allSnippets.filter(snippet => 
     snippet.name.toLowerCase().includes(lowerSearchTerm) ||
+    (snippet.description && snippet.description.toLowerCase().includes(lowerSearchTerm)) ||
     (snippet.author && snippet.author.toLowerCase().includes(lowerSearchTerm))
   );
 };

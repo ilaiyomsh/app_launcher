@@ -184,6 +184,11 @@ function AdminPage() {
                         <h3 className="font-semibold text-gray-900 mb-1">
                           {snippet.name}
                         </h3>
+                        {snippet.description && (
+                          <p className="text-xs text-gray-600 mb-1 line-clamp-2">
+                            {snippet.description}
+                          </p>
+                        )}
                         <p className="text-xs text-gray-500">
                           עודכן: {snippet.updatedAt.toLocaleDateString('he-IL')}
                         </p>

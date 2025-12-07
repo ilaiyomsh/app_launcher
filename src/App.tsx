@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import CreatePage from './pages/CreatePage';
 import ViewPage from './pages/ViewPage';
 import AdminPage from './pages/AdminPage';
@@ -19,7 +19,7 @@ function App() {
         <Route path="/view/:id" element={<ViewPage />} />
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin" element={<AdminPage />} />
-        <Route path="/" element={<Navigate to="/create" replace />} />
+        <Route path="/" element={<BrowsePage />} />
       </Routes>
     </BrowserRouter>
   );

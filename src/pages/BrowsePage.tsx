@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getAllSnippets } from '../services/snippetService';
 import { Snippet } from '../types';
-import { ExternalLink, Loader2, Calendar, User, Settings, Copy, Check } from 'lucide-react';
+import { ExternalLink, Loader2, Calendar, User, Settings, Copy, Check, Plus } from 'lucide-react';
 
 function BrowsePage() {
   const [snippets, setSnippets] = useState<Snippet[]>([]);
@@ -73,13 +73,22 @@ function BrowsePage() {
               <h1 className="text-4xl font-bold text-gray-900 mb-2">גלריית כלים</h1>
               <p className="text-gray-600 text-lg">כל הכלים הזמינים לשימוש</p>
             </div>
-            <Link
-              to="/admin"
-              className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white hover:bg-gray-900 rounded-lg transition-colors"
-            >
-              <Settings size={18} />
-              ניהול
-            </Link>
+            <div className="flex items-center gap-3">
+              <Link
+                to="/create"
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors"
+              >
+                <Plus size={18} />
+                צור כלי חדש
+              </Link>
+              <Link
+                to="/admin"
+                className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white hover:bg-gray-900 rounded-lg transition-colors"
+              >
+                <Settings size={18} />
+                ניהול
+              </Link>
+            </div>
           </div>
         </div>
 
@@ -95,9 +104,15 @@ function BrowsePage() {
                 key={snippet.id}
                 className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
               >
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
                   {snippet.name}
                 </h3>
+
+                {snippet.description && (
+                  <p className="text-gray-600 mb-3 text-sm">
+                    {snippet.description}
+                  </p>
+                )}
 
                 <div className="space-y-2 mb-4 text-sm text-gray-600">
                   {snippet.author && (

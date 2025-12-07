@@ -5,6 +5,7 @@ import { Copy, Check, Loader2, Grid3x3, Settings } from 'lucide-react';
 
 function CreatePage() {
   const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
   const [code, setCode] = useState('');
   const [author, setAuthor] = useState('');
   const [loading, setLoading] = useState(false);
@@ -44,6 +45,7 @@ function CreatePage() {
       
       const id = await createSnippet({
         name: name.trim(),
+        description: description.trim() || undefined,
         code: codeToSave,
         author: author.trim() || undefined,
       });
@@ -53,6 +55,7 @@ function CreatePage() {
       
       // איפוס הטופס
       setName('');
+      setDescription('');
       setCode('');
       setAuthor('');
     } catch (err) {
@@ -148,6 +151,20 @@ function CreatePage() {
                 placeholder="למשל: מחשבון עמלות מרץ"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+                תיאור הכלי (אופציונלי)
+              </label>
+              <textarea
+                id="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="תיאור קצר של מה הכלי עושה..."
+                rows={3}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
 
