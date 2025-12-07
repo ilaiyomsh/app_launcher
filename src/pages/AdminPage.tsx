@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { getAllSnippets, updateSnippet, deleteSnippet, searchSnippets } from '../services/snippetService';
 import { Snippet } from '../types';
-import Editor from '@monaco-editor/react';
-import { Search, Trash2, Save, LogOut, Loader2, ExternalLink } from 'lucide-react';
+import { Search, Trash2, Save, LogOut, Loader2, ExternalLink, Grid3x3 } from 'lucide-react';
 
 function AdminPage() {
   const navigate = useNavigate();
@@ -56,8 +55,10 @@ function AdminPage() {
   };
 
   const handleSelectSnippet = (snippet: Snippet) => {
+    console.log('📝 בוחר snippet:', snippet.name);
+    console.log('📏 אורך הקוד:', snippet.code?.length || 0);
     setSelectedSnippet(snippet);
-    setEditedCode(snippet.code);
+    setEditedCode(snippet.code || '');
     setError(null);
   };
 
@@ -126,13 +127,22 @@ function AdminPage() {
       <div className="bg-white border-b border-gray-200 px-6 py-4">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold text-gray-900">ניהול כלים</h1>
-          <button
-            onClick={handleLogout}
-            className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg flex items-center gap-2 transition-colors"
-          >
-            <LogOut size={18} />
-            התנתק
-          </button>
+          <div className="flex items-center gap-3">
+            <Link
+              to="/browse"
+              className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg flex items-center gap-2 transition-colors"
+            >
+              <Grid3x3 size={18} />
+              צפה בכל הכלים
+            </Link>
+            <button
+              onClick={handleLogout}
+              className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg flex items-center gap-2 transition-colors"
+            >
+              <LogOut size={18} />
+              התנתק
+            </button>
+          </div>
         </div>
       </div>
 
@@ -202,7 +212,7 @@ function AdminPage() {
         </div>
 
         {/* Main Content - עורך קוד */}
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col bg-white">
           {selectedSnippet ? (
             <>
               {/* Toolbar */}
@@ -247,19 +257,23 @@ function AdminPage() {
               )}
 
               {/* Editor */}
-              <div className="flex-1">
-                <Editor
-                  height="100%"
-                  defaultLanguage="javascript"
+              <div className="flex-1 p-4">
+                <textarea
                   value={editedCode}
-                  onChange={(value) => setEditedCode(value || '')}
-                  theme="vs-light"
-                  options={{
-                    minimap: { enabled: false },
-                    fontSize: 14,
-                    wordWrap: 'on',
-                    automaticLayout: true,
+                  onChange={(e) => setEditedCode(e.target.value)}
+                  className="w-full h-full min-h-[600px] p-4 border border-gray-300 rounded-lg font-mono text-sm resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  style={{
+                    fontFamily: 'Menlo, Monaco, "Courier New", monospace',
+                    fontSize: '14px',
+                    lineHeight: '1.5',
+                    direction: 'ltr',
+                    textAlign: 'left',
+                    whiteSpace: 'pre',
+                    overflowWrap: 'normal',
+                    tabSize: 2,
                   }}
+                  spellCheck={false}
+                  placeholder="הדבק את קוד React כאן..."
                 />
               </div>
             </>

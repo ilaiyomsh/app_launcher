@@ -3,6 +3,7 @@ import CreatePage from './pages/CreatePage';
 import ViewPage from './pages/ViewPage';
 import AdminPage from './pages/AdminPage';
 import AdminLogin from './pages/AdminLogin';
+import BrowsePage from './pages/BrowsePage';
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
     >
       <Routes>
         <Route path="/create" element={<CreatePage />} />
+        <Route path="/browse" element={<BrowsePage />} />
         <Route path="/view/:id" element={<ViewPage />} />
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin" element={<AdminPage />} />
