@@ -59,8 +59,6 @@ function AdminPage() {
   };
 
   const handleSelectSnippet = (snippet: Snippet) => {
-    console.log('📝 בוחר snippet:', snippet.name);
-    console.log('📏 אורך הקוד:', snippet.code?.length || 0);
     setSelectedSnippet(snippet);
     setEditedName(snippet.name || '');
     setEditedDescription(snippet.description || '');
@@ -106,14 +104,7 @@ function AdminPage() {
         updateData.author = editedAuthor.trim();
       }
 
-      console.log('💾 שומר שינויים:', {
-        id: selectedSnippet.id,
-        updateData,
-      });
-
       await updateSnippet(selectedSnippet.id, updateData);
-
-      console.log('✅ שמירה הושלמה בהצלחה');
 
       // עדכון הרשימה
       await loadSnippets();
@@ -130,9 +121,9 @@ function AdminPage() {
       }
       alert('השינויים נשמרו בהצלחה!');
     } catch (err) {
-      console.error('❌ שגיאה בשמירת השינויים:', err);
       const errorMessage = err instanceof Error ? err.message : 'שגיאה לא ידועה';
       setError(`שגיאה בשמירת השינויים: ${errorMessage}`);
+      console.error('שגיאה בשמירת השינויים:', err);
     } finally {
       setSaving(false);
     }

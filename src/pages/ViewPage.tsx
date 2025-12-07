@@ -46,20 +46,14 @@ function ViewPage() {
           // תיקון: אם הקוד מתחיל ב-unction במקום function, נוסיף f
           if (processedCode.startsWith('unction ')) {
             processedCode = 'f' + processedCode;
-            console.log('🔧 תוקן: הוסף f בתחילת הקוד');
           }
           
           // אם הקוד לא כולל export default, נוסיף אותו
           if (!processedCode.includes('export default')) {
             const componentName = extractComponentName(processedCode) || 'App';
             processedCode = processedCode + `\n\nexport default ${componentName};`;
-            console.log('✅ הוסף export default עבור:', componentName);
-          } else {
-            console.log('✅ הקוד כבר כולל export default');
           }
           
-          console.log('📄 קוד נטען (100 תווים ראשונים):', processedCode.substring(0, 100));
-          console.log('📄 קוד נטען (100 תווים אחרונים):', processedCode.substring(Math.max(0, processedCode.length - 100)));
           setCode(processedCode);
         }
       } catch (err) {
@@ -99,9 +93,6 @@ function ViewPage() {
       </div>
     );
   }
-
-  console.log('🎨 רונדר ViewPage עם קוד:', code ? 'יש קוד' : 'אין קוד');
-  console.log('📦 אורך הקוד:', code?.length || 0);
 
   return (
     <div className="w-full h-screen overflow-hidden" style={{ margin: 0, padding: 0, position: 'relative' }}>

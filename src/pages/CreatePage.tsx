@@ -43,14 +43,7 @@ function CreatePage() {
       // תיקון: אם הקוד מתחיל ב-unction במקום function, נוסיף f
       if (codeToSave.startsWith('unction ')) {
         codeToSave = 'f' + codeToSave;
-        console.log('🔧 תוקן: הוסף f בתחילת הקוד לפני שמירה');
       }
-      
-      // לוגים לבדיקה
-      console.log('📋 לפני שמירה:');
-      console.log('📏 אורך הקוד:', codeToSave.length);
-      console.log('📄 100 תווים ראשונים:', codeToSave.substring(0, 100));
-      console.log('📄 100 תווים אחרונים:', codeToSave.substring(Math.max(0, codeToSave.length - 100)));
       
       const id = await createSnippet({
         name: name.trim(),

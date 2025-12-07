@@ -18,12 +18,6 @@ const COLLECTION_NAME = 'snippets';
 export const createSnippet = async (data: SnippetData): Promise<string> => {
   const now = Timestamp.now();
   
-  // לוגים לבדיקה
-  console.log('💾 שומר קוד ב-Firebase:');
-  console.log('📏 אורך הקוד:', data.code.length);
-  console.log('📄 100 תווים ראשונים:', data.code.substring(0, 100));
-  console.log('📄 100 תווים אחרונים:', data.code.substring(Math.max(0, data.code.length - 100)));
-  
   const docRef = await addDoc(collection(db, COLLECTION_NAME), {
     name: data.name,
     description: data.description || '',
@@ -33,7 +27,6 @@ export const createSnippet = async (data: SnippetData): Promise<string> => {
     updatedAt: now,
   });
   
-  console.log('✅ קוד נשמר בהצלחה, ID:', docRef.id);
   return docRef.id;
 };
 
@@ -46,12 +39,6 @@ export const getSnippet = async (id: string): Promise<Snippet | null> => {
   }
   
   const data = docSnap.data();
-  
-  // לוגים לבדיקה
-  console.log('📥 טוען קוד מ-Firebase:');
-  console.log('📏 אורך הקוד שנטען:', data.code?.length || 0);
-  console.log('📄 100 תווים ראשונים:', data.code?.substring(0, 100) || 'אין קוד');
-  console.log('📄 100 תווים אחרונים:', data.code?.substring(Math.max(0, (data.code?.length || 0) - 100)) || 'אין קוד');
   
   return {
     id: docSnap.id,
@@ -126,7 +113,6 @@ export const updateSnippet = async (id: string, data: Partial<SnippetData>): Pro
     cleanData.code = data.code;
   }
   
-  console.log('📤 מעדכן Firestore עם:', cleanData);
   await updateDoc(docRef, cleanData);
 };
 
