@@ -166,9 +166,19 @@ function CreatePage() {
             </div>
 
             <div>
-              <label htmlFor="code" className="block text-sm font-medium text-gray-700 mb-2">
-                קוד React *
-              </label>
+              <div className="flex items-center justify-between mb-2">
+                <label htmlFor="code" className="block text-sm font-medium text-gray-700">
+                  קוד React *
+                </label>
+                <a
+                  href="https://github.com/ilaiyomsh/app_launcher/blob/main/GUIDE.md"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-blue-600 hover:text-blue-700 underline"
+                >
+                  📖 קרא את המדריך לכתיבת כלים
+                </a>
+              </div>
               <textarea
                 id="code"
                 value={code}
@@ -178,6 +188,9 @@ function CreatePage() {
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
                 required
               />
+              <p className="mt-2 text-xs text-gray-500">
+                💡 טיפ: ודא שהקוד כולל <code className="bg-gray-100 px-1 rounded">export default App;</code> בסוף
+              </p>
             </div>
 
             <button
