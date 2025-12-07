@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { createSnippet } from '../services/snippetService';
-import { Copy, Check, Loader2, Grid3x3 } from 'lucide-react';
+import { Copy, Check, Loader2, Grid3x3, Settings } from 'lucide-react';
 
 function CreatePage() {
   const [name, setName] = useState('');
@@ -79,13 +79,22 @@ function CreatePage() {
             <h1 className="text-3xl font-bold text-gray-900">
               יצירת כלי חדש
             </h1>
-            <Link
-              to="/browse"
-              className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <Grid3x3 size={18} />
-              צפה בכל הכלים
-            </Link>
+            <div className="flex items-center gap-3">
+              <Link
+                to="/browse"
+                className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <Grid3x3 size={18} />
+                צפה בכל הכלים
+              </Link>
+              <Link
+                to="/admin"
+                className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white hover:bg-gray-900 rounded-lg transition-colors"
+              >
+                <Settings size={18} />
+                ניהול
+              </Link>
+            </div>
           </div>
 
           {error && (
