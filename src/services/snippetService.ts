@@ -10,19 +10,24 @@ import {
   orderBy,
   Timestamp 
 } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { db, auth } from '../config/firebase';
 import { Snippet, SnippetData } from '../types';
 
 const COLLECTION_NAME = 'snippets';
 
-export const createSnippet = async (data: SnippetData): Promise<string> => {
+export const createSnippet = async (data: Omit<SnippetData, 'author'>): Promise<string> => {
+  const user = auth.currentUser;
+  if (!user) {
+    throw new Error('משתמש לא מחובר');
+  }
+
   const now = Timestamp.now();
   
   const docRef = await addDoc(collection(db, COLLECTION_NAME), {
     name: data.name,
     description: data.description || '',
     code: data.code,
-    author: data.author || '',
+    author: user.email || user.displayName || 'Unknown',
     createdAt: now,
     updatedAt: now,
   });
@@ -47,7 +52,7 @@ export const getSnippet = async (id: string): Promise<Snippet | null> => {
     code: data.code,
     createdAt: data.createdAt.toDate(),
     updatedAt: data.updatedAt.toDate(),
-    author: data.author,
+    author: data.author || 'Unknown', // Fallback לכלים ישנים
   };
 };
 
@@ -67,7 +72,7 @@ export const getAllSnippets = async (): Promise<Snippet[]> => {
       code: data.code,
       createdAt: data.createdAt.toDate(),
       updatedAt: data.updatedAt.toDate(),
-      author: data.author,
+      author: data.author || 'Unknown', // Fallback לכלים ישנים
     };
   });
 };

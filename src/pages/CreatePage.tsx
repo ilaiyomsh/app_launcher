@@ -2,21 +2,28 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { createSnippet } from '../services/snippetService';
 import { validateReactCode } from '../utils/codeValidator';
+import { useAuth } from '../contexts/AuthContext';
 import { Copy, Check, Loader2, Grid3x3, Settings, Download } from 'lucide-react';
 
 function CreatePage() {
+  const { user } = useAuth();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [code, setCode] = useState('');
-  const [author, setAuthor] = useState('');
   const [loading, setLoading] = useState(false);
   const [createdUrl, setCreatedUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    if (!user) {
+      setError('יש להתחבר כדי ליצור כלי');
+      return;
+    }
 
     if (!name.trim()) {
       setError('שם הכלי הוא שדה חובה');
@@ -49,7 +56,6 @@ function CreatePage() {
         name: name.trim(),
         description: description.trim() || undefined,
         code: codeToSave,
-        author: author.trim() || undefined,
       });
 
       const url = `${window.location.origin}/view/${id}`;
@@ -59,7 +65,6 @@ function CreatePage() {
       setName('');
       setDescription('');
       setCode('');
-      setAuthor('');
     } catch (err) {
       setError('שגיאה ביצירת הכלי. נסה שוב.');
       console.error(err);
@@ -166,13 +171,15 @@ function CreatePage() {
                 <Grid3x3 size={18} />
                 צפה בכל הכלים
               </Link>
-              <Link
-                to="/admin"
-                className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white hover:bg-gray-900 rounded-lg transition-colors"
-              >
-                <Settings size={18} />
-                ניהול
-              </Link>
+              {user && (
+                <Link
+                  to="/admin"
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white hover:bg-gray-900 rounded-lg transition-colors"
+                >
+                  <Settings size={18} />
+                  ניהול
+                </Link>
+              )}
             </div>
           </div>
 
@@ -244,19 +251,6 @@ function CreatePage() {
               />
             </div>
 
-            <div>
-              <label htmlFor="author" className="block text-sm font-medium text-gray-700 mb-2">
-                שם יוצר (אופציונלי)
-              </label>
-              <input
-                id="author"
-                type="text"
-                value={author}
-                onChange={(e) => setAuthor(e.target.value)}
-                placeholder="שם המשתמש שיצר את הכלי"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
 
             <div>
               <div className="flex items-center justify-between mb-2">

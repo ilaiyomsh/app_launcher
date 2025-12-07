@@ -1,14 +1,22 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { getAllSnippets } from '../services/snippetService';
+import { useAuth } from '../contexts/AuthContext';
 import { Snippet } from '../types';
-import { ExternalLink, Loader2, Calendar, User, Settings, Copy, Check, Plus } from 'lucide-react';
+import { ExternalLink, Loader2, Calendar, User, Settings, Copy, Check, Plus, Edit } from 'lucide-react';
 
 function BrowsePage() {
+  const navigate = useNavigate();
+  const { user, isAdmin } = useAuth();
   const [snippets, setSnippets] = useState<Snippet[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const canEditSnippet = (snippet: Snippet) => {
+    if (!user) return false;
+    return isAdmin || snippet.author === user.email;
+  };
 
   useEffect(() => {
     loadSnippets();
@@ -114,20 +122,32 @@ function BrowsePage() {
               <p className="text-gray-600 text-lg">כל הכלים הזמינים לשימוש</p>
             </div>
             <div className="flex items-center gap-3">
-              <Link
-                to="/create"
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors"
-              >
-                <Plus size={18} />
-                צור כלי חדש
-              </Link>
-              <Link
-                to="/admin"
-                className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white hover:bg-gray-900 rounded-lg transition-colors"
-              >
-                <Settings size={18} />
-                ניהול
-              </Link>
+              {user ? (
+                <>
+                  <Link
+                    to="/create"
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors"
+                  >
+                    <Plus size={18} />
+                    צור כלי חדש
+                  </Link>
+                  <Link
+                    to="/admin"
+                    className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white hover:bg-gray-900 rounded-lg transition-colors"
+                  >
+                    <Settings size={18} />
+                    ניהול
+                  </Link>
+                </>
+              ) : (
+                <Link
+                  to="/admin/login"
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors"
+                >
+                  <Plus size={18} />
+                  צור כלי חדש
+                </Link>
+              )}
             </div>
           </div>
         </div>
@@ -167,7 +187,7 @@ function BrowsePage() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <a
                     href={getViewUrl(snippet.id)}
                     target="_blank"
@@ -177,6 +197,16 @@ function BrowsePage() {
                     <ExternalLink size={18} />
                     פתח כלי
                   </a>
+                  {canEditSnippet(snippet) && (
+                    <button
+                      onClick={() => navigate(`/admin?snippet=${snippet.id}`)}
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                      title="ערוך כלי"
+                    >
+                      <Edit size={18} />
+                      ערוך
+                    </button>
+                  )}
                   <button
                     onClick={() => handleCopyLink(snippet.id)}
                     className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors flex items-center gap-2"

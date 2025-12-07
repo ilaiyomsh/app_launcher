@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { getAllSnippets, updateSnippet, deleteSnippet, searchSnippets } from '../services/snippetService';
 import { validateReactCode } from '../utils/codeValidator';
+import { useAuth } from '../contexts/AuthContext';
 import { Snippet } from '../types';
 import { Search, Trash2, Save, LogOut, Loader2, ExternalLink, Grid3x3 } from 'lucide-react';
 
 function AdminPage() {
   const navigate = useNavigate();
+  const { user, signOut, isAdmin, loading: authLoading } = useAuth();
   const [snippets, setSnippets] = useState<Snippet[]>([]);
   const [selectedSnippet, setSelectedSnippet] = useState<Snippet | null>(null);
   const [editedName, setEditedName] = useState('');
@@ -19,15 +21,36 @@ function AdminPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // בדיקת אימות
-    const isAuthenticated = localStorage.getItem('admin_authenticated');
-    if (!isAuthenticated) {
+    if (authLoading) return;
+    
+    if (!user) {
       navigate('/admin/login');
       return;
     }
 
     loadSnippets();
-  }, [navigate]);
+  }, [user, authLoading, navigate]);
+
+  // טיפול בפרמטר snippet מ-URL
+  useEffect(() => {
+    if (!user || snippets.length === 0) return;
+    
+    const params = new URLSearchParams(window.location.search);
+    const snippetId = params.get('snippet');
+    if (snippetId) {
+      const snippet = snippets.find(s => s.id === snippetId);
+      if (snippet) {
+        setSelectedSnippet(snippet);
+        setEditedName(snippet.name || '');
+        setEditedDescription(snippet.description || '');
+        setEditedAuthor(snippet.author || '');
+        setEditedCode(snippet.code || '');
+        setError(null);
+        // נקה את ה-URL
+        window.history.replaceState({}, '', '/admin');
+      }
+    }
+  }, [snippets, user]);
 
   const loadSnippets = async () => {
     setLoading(true);
@@ -150,9 +173,19 @@ function AdminPage() {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('admin_authenticated');
+  const handleLogout = async () => {
+    await signOut();
     navigate('/admin/login');
+  };
+
+  const canEditSnippet = (snippet: Snippet) => {
+    if (!user) return false;
+    return isAdmin || snippet.author === user.email;
+  };
+
+  const canDeleteSnippet = (snippet: Snippet) => {
+    if (!user) return false;
+    return isAdmin || snippet.author === user.email;
   };
 
   const getViewUrl = (id: string) => {
@@ -172,7 +205,28 @@ function AdminPage() {
       {/* Header */}
       <div className="bg-white border-b border-gray-200 px-6 py-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-gray-900">ניהול כלים</h1>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">ניהול כלים</h1>
+            {user && (
+              <div className="flex items-center gap-2 mt-1">
+                {user.photoURL && (
+                  <img
+                    src={user.photoURL}
+                    alt={user.displayName || 'User'}
+                    className="w-6 h-6 rounded-full"
+                  />
+                )}
+                <span className="text-sm text-gray-600">
+                  {user.displayName || user.email}
+                </span>
+                {isAdmin && (
+                  <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
+                    Admin
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
           <div className="flex items-center gap-3">
             <Link
               to="/browse"
@@ -244,16 +298,23 @@ function AdminPage() {
                           </p>
                         )}
                       </div>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDelete(snippet.id);
-                        }}
-                        className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors"
-                        title="מחק"
-                      >
-                        <Trash2 size={16} />
-                      </button>
+                      {canDeleteSnippet(snippet) && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(snippet.id);
+                          }}
+                          className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors"
+                          title="מחק"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      )}
+                      {!canEditSnippet(snippet) && (
+                        <span className="text-xs text-gray-400 px-2 py-1 bg-gray-100 rounded">
+                          לא שלך
+                        </span>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -272,26 +333,34 @@ function AdminPage() {
                   <h2 className="text-lg font-semibold text-gray-900">
                     {selectedSnippet.name}
                   </h2>
-                  <a
-                    href={getViewUrl(selectedSnippet.id)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1 mt-1"
-                  >
-                    <ExternalLink size={14} />
-                    פתח בתצוגה
-                  </a>
+                  <div className="flex items-center gap-3 mt-1">
+                    <a
+                      href={getViewUrl(selectedSnippet.id)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                    >
+                      <ExternalLink size={14} />
+                      פתח בתצוגה
+                    </a>
+                    {!canEditSnippet(selectedSnippet) && (
+                      <span className="text-xs text-orange-600 bg-orange-50 px-2 py-1 rounded">
+                        ⚠️ כלי של משתמש אחר - עריכה מוגבלת
+                      </span>
+                    )}
+                  </div>
                 </div>
-                <button
-                  onClick={handleSave}
-                  disabled={saving || (
-                    editedName === selectedSnippet.name &&
-                    editedDescription === (selectedSnippet.description || '') &&
-                    editedAuthor === (selectedSnippet.author || '') &&
-                    editedCode === selectedSnippet.code
-                  )}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
-                >
+                {canEditSnippet(selectedSnippet) ? (
+                  <button
+                    onClick={handleSave}
+                    disabled={saving || (
+                      editedName === selectedSnippet.name &&
+                      editedDescription === (selectedSnippet.description || '') &&
+                      editedAuthor === (selectedSnippet.author || '') &&
+                      editedCode === selectedSnippet.code
+                    )}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
+                  >
                   {saving ? (
                     <>
                       <Loader2 size={18} className="animate-spin" />
@@ -304,6 +373,11 @@ function AdminPage() {
                     </>
                   )}
                 </button>
+                ) : (
+                  <span className="text-sm text-gray-500">
+                    אין הרשאה לערוך כלי זה
+                  </span>
+                )}
               </div>
 
               {error && (
@@ -341,7 +415,8 @@ function AdminPage() {
                     onChange={(e) => setEditedDescription(e.target.value)}
                     placeholder="תיאור קצר של הכלי"
                     rows={3}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-sans text-sm resize-y"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-sans text-sm resize-y disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    disabled={!canEditSnippet(selectedSnippet)}
                   />
                 </div>
 
@@ -356,7 +431,8 @@ function AdminPage() {
                     value={editedAuthor}
                     onChange={(e) => setEditedAuthor(e.target.value)}
                     placeholder="שם היוצר"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    disabled={!canEditSnippet(selectedSnippet)}
                   />
                 </div>
 
@@ -369,7 +445,7 @@ function AdminPage() {
                     id="editedCode"
                     value={editedCode}
                     onChange={(e) => setEditedCode(e.target.value)}
-                    className="w-full flex-1 min-h-[600px] p-4 border border-gray-300 rounded-lg font-mono text-sm resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full flex-1 min-h-[600px] p-4 border border-gray-300 rounded-lg font-mono text-sm resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
                     style={{
                       fontFamily: 'Menlo, Monaco, "Courier New", monospace',
                       fontSize: '14px',
@@ -382,6 +458,7 @@ function AdminPage() {
                     }}
                     spellCheck={false}
                     placeholder="הדבק את קוד React כאן..."
+                    disabled={!canEditSnippet(selectedSnippet)}
                   />
                 </div>
               </div>
