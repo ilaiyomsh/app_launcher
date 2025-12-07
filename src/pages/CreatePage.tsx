@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { createSnippet } from '../services/snippetService';
-import { Copy, Check, Loader2, Grid3x3, Settings } from 'lucide-react';
+import { Copy, Check, Loader2, Grid3x3, Settings, Download } from 'lucide-react';
 
 function CreatePage() {
   const [name, setName] = useState('');
@@ -74,6 +74,28 @@ function CreatePage() {
     }
   };
 
+  const handleDownloadGuide = async () => {
+    try {
+      const response = await fetch('/GUIDE.md');
+      if (!response.ok) {
+        throw new Error('Failed to fetch guide');
+      }
+      const text = await response.text();
+      const blob = new Blob([text], { type: 'text/markdown;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'מדריך-כתיבת-כלים.md';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('שגיאה בהורדת המדריך:', err);
+      alert('שגיאה בהורדת המדריך. נסה שוב.');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
       <div className="max-w-4xl mx-auto">
@@ -83,6 +105,14 @@ function CreatePage() {
               יצירת כלי חדש
             </h1>
             <div className="flex items-center gap-3">
+              <button
+                onClick={handleDownloadGuide}
+                className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors border border-gray-300"
+                title="הורד את המדריך בפורמט MD"
+              >
+                <Download size={18} />
+                הורד מדריך
+              </button>
               <Link
                 to="/browse"
                 className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
