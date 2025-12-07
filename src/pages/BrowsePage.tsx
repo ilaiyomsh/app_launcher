@@ -2,12 +2,13 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getAllSnippets } from '../services/snippetService';
 import { Snippet } from '../types';
-import { ExternalLink, Loader2, Calendar, User, Settings } from 'lucide-react';
+import { ExternalLink, Loader2, Calendar, User, Settings, Copy, Check } from 'lucide-react';
 
 function BrowsePage() {
   const [snippets, setSnippets] = useState<Snippet[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   useEffect(() => {
     loadSnippets();
@@ -28,6 +29,17 @@ function BrowsePage() {
 
   const getViewUrl = (id: string) => {
     return `${window.location.origin}/view/${id}`;
+  };
+
+  const handleCopyLink = async (id: string) => {
+    const url = getViewUrl(id);
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopiedId(id);
+      setTimeout(() => setCopiedId(null), 2000);
+    } catch (err) {
+      console.error('שגיאה בהעתקת הקישור:', err);
+    }
   };
 
   if (loading) {
@@ -100,15 +112,34 @@ function BrowsePage() {
                   </div>
                 </div>
 
-                <a
-                  href={getViewUrl(snippet.id)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  <ExternalLink size={18} />
-                  פתח כלי
-                </a>
+                <div className="flex items-center gap-2">
+                  <a
+                    href={getViewUrl(snippet.id)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    <ExternalLink size={18} />
+                    פתח כלי
+                  </a>
+                  <button
+                    onClick={() => handleCopyLink(snippet.id)}
+                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors flex items-center gap-2"
+                    title="העתק קישור"
+                  >
+                    {copiedId === snippet.id ? (
+                      <>
+                        <Check size={18} />
+                        הועתק!
+                      </>
+                    ) : (
+                      <>
+                        <Copy size={18} />
+                        העתק
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
             ))}
           </div>
