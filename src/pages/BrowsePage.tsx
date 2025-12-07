@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { getAllSnippets } from '../services/snippetService';
 import { Snippet } from '../types';
-import { ExternalLink, Loader2, Calendar, User } from 'lucide-react';
+import { ExternalLink, Loader2, Calendar, User, Settings } from 'lucide-react';
 
 function BrowsePage() {
   const [snippets, setSnippets] = useState<Snippet[]>([]);
@@ -54,9 +55,20 @@ function BrowsePage() {
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-10 text-center">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">גלריית כלים</h1>
-          <p className="text-gray-600 text-lg">כל הכלים הזמינים לשימוש</p>
+        <div className="mb-10">
+          <div className="flex items-center justify-between mb-4">
+            <div className="text-center flex-1">
+              <h1 className="text-4xl font-bold text-gray-900 mb-2">גלריית כלים</h1>
+              <p className="text-gray-600 text-lg">כל הכלים הזמינים לשימוש</p>
+            </div>
+            <Link
+              to="/admin"
+              className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white hover:bg-gray-900 rounded-lg transition-colors"
+            >
+              <Settings size={18} />
+              ניהול
+            </Link>
+          </div>
         </div>
 
         {/* Tools Grid */}
