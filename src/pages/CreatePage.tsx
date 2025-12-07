@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { createSnippet } from '../services/snippetService';
+import { validateReactCode } from '../utils/codeValidator';
 import { Copy, Check, Loader2, Grid3x3, Settings, Download } from 'lucide-react';
 
 function CreatePage() {
@@ -27,7 +28,15 @@ function CreatePage() {
       return;
     }
 
+    // ולידציה מתקדמת של הקוד
     setLoading(true);
+    const validation = await validateReactCode(code);
+    if (!validation.valid) {
+      setError(validation.error || 'הקוד לא תקין');
+      setLoading(false);
+      return;
+    }
+
     try {
       let codeToSave = code.trim();
       

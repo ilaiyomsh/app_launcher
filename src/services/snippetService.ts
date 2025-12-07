@@ -86,9 +86,15 @@ export const getAllSnippets = async (): Promise<Snippet[]> => {
 };
 
 export const searchSnippets = async (searchTerm: string): Promise<Snippet[]> => {
-  // חיפוש בצד הלקוח - טוען את כל הכלים ומסנן לפי שם
+  // טוען את כל הכלים (ללא הגבלה) ומסנן ב-client
+  // הערה: Firestore לא תומך בחיפוש טקסט חופשי מלא, לכן הסינון נעשה ב-client
+  // אם בעתיד יהיו הרבה כלים, ניתן להוסיף pagination או caching
   const allSnippets = await getAllSnippets();
-  const lowerSearchTerm = searchTerm.toLowerCase();
+  const lowerSearchTerm = searchTerm.toLowerCase().trim();
+  
+  if (!lowerSearchTerm) {
+    return allSnippets;
+  }
   
   return allSnippets.filter(snippet => 
     snippet.name.toLowerCase().includes(lowerSearchTerm) ||
@@ -97,10 +103,10 @@ export const searchSnippets = async (searchTerm: string): Promise<Snippet[]> => 
   );
 };
 
-export const updateSnippet = async (id: string, code: string): Promise<void> => {
+export const updateSnippet = async (id: string, data: Partial<SnippetData>): Promise<void> => {
   const docRef = doc(db, COLLECTION_NAME, id);
   await updateDoc(docRef, {
-    code,
+    ...data,
     updatedAt: Timestamp.now(),
   });
 };

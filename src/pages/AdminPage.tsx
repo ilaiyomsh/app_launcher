@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { getAllSnippets, updateSnippet, deleteSnippet, searchSnippets } from '../services/snippetService';
+import { validateReactCode } from '../utils/codeValidator';
 import { Snippet } from '../types';
 import { Search, Trash2, Save, LogOut, Loader2, ExternalLink, Grid3x3 } from 'lucide-react';
 
@@ -8,6 +9,9 @@ function AdminPage() {
   const navigate = useNavigate();
   const [snippets, setSnippets] = useState<Snippet[]>([]);
   const [selectedSnippet, setSelectedSnippet] = useState<Snippet | null>(null);
+  const [editedName, setEditedName] = useState('');
+  const [editedDescription, setEditedDescription] = useState('');
+  const [editedAuthor, setEditedAuthor] = useState('');
   const [editedCode, setEditedCode] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
@@ -58,6 +62,9 @@ function AdminPage() {
     console.log('📝 בוחר snippet:', snippet.name);
     console.log('📏 אורך הקוד:', snippet.code?.length || 0);
     setSelectedSnippet(snippet);
+    setEditedName(snippet.name || '');
+    setEditedDescription(snippet.description || '');
+    setEditedAuthor(snippet.author || '');
     setEditedCode(snippet.code || '');
     setError(null);
   };
@@ -65,10 +72,30 @@ function AdminPage() {
   const handleSave = async () => {
     if (!selectedSnippet) return;
 
+    // ולידציה בסיסית
+    if (!editedName.trim()) {
+      setError('שם הכלי הוא שדה חובה');
+      return;
+    }
+
     setSaving(true);
     setError(null);
+    
+    // ולידציה של הקוד
+    const validation = await validateReactCode(editedCode);
+    if (!validation.valid) {
+      setError(validation.error || 'הקוד לא תקין ולא ניתן לשמור');
+      setSaving(false);
+      return;
+    }
+
     try {
-      await updateSnippet(selectedSnippet.id, editedCode);
+      await updateSnippet(selectedSnippet.id, {
+        name: editedName.trim(),
+        description: editedDescription.trim() || undefined,
+        author: editedAuthor.trim() || undefined,
+        code: editedCode,
+      });
       // עדכון הרשימה
       await loadSnippets();
       // עדכון הכלי הנבחר
@@ -95,6 +122,9 @@ function AdminPage() {
       await deleteSnippet(id);
       if (selectedSnippet?.id === id) {
         setSelectedSnippet(null);
+        setEditedName('');
+        setEditedDescription('');
+        setEditedAuthor('');
         setEditedCode('');
       }
       await loadSnippets();
@@ -238,7 +268,12 @@ function AdminPage() {
                 </div>
                 <button
                   onClick={handleSave}
-                  disabled={saving || editedCode === selectedSnippet.code}
+                  disabled={saving || (
+                    editedName === selectedSnippet.name &&
+                    editedDescription === (selectedSnippet.description || '') &&
+                    editedAuthor === (selectedSnippet.author || '') &&
+                    editedCode === selectedSnippet.code
+                  )}
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
                 >
                   {saving ? (
@@ -262,24 +297,77 @@ function AdminPage() {
               )}
 
               {/* Editor */}
-              <div className="flex-1 p-4">
-                <textarea
-                  value={editedCode}
-                  onChange={(e) => setEditedCode(e.target.value)}
-                  className="w-full h-full min-h-[600px] p-4 border border-gray-300 rounded-lg font-mono text-sm resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  style={{
-                    fontFamily: 'Menlo, Monaco, "Courier New", monospace',
-                    fontSize: '14px',
-                    lineHeight: '1.5',
-                    direction: 'ltr',
-                    textAlign: 'left',
-                    whiteSpace: 'pre',
-                    overflowWrap: 'normal',
-                    tabSize: 2,
-                  }}
-                  spellCheck={false}
-                  placeholder="הדבק את קוד React כאן..."
-                />
+              <div className="flex-1 p-4 flex flex-col gap-4 overflow-auto">
+                {/* Name Editor */}
+                <div>
+                  <label htmlFor="editedName" className="block text-sm font-medium text-gray-700 mb-2">
+                    שם הכלי *
+                  </label>
+                  <input
+                    id="editedName"
+                    type="text"
+                    value={editedName}
+                    onChange={(e) => setEditedName(e.target.value)}
+                    placeholder="שם הכלי"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required
+                  />
+                </div>
+
+                {/* Description Editor */}
+                <div>
+                  <label htmlFor="editedDescription" className="block text-sm font-medium text-gray-700 mb-2">
+                    תיאור הכלי
+                  </label>
+                  <textarea
+                    id="editedDescription"
+                    value={editedDescription}
+                    onChange={(e) => setEditedDescription(e.target.value)}
+                    placeholder="תיאור קצר של הכלי"
+                    rows={3}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-sans text-sm resize-y"
+                  />
+                </div>
+
+                {/* Author Editor */}
+                <div>
+                  <label htmlFor="editedAuthor" className="block text-sm font-medium text-gray-700 mb-2">
+                    שם יוצר
+                  </label>
+                  <input
+                    id="editedAuthor"
+                    type="text"
+                    value={editedAuthor}
+                    onChange={(e) => setEditedAuthor(e.target.value)}
+                    placeholder="שם היוצר"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                {/* Code Editor */}
+                <div className="flex-1 flex flex-col">
+                  <label htmlFor="editedCode" className="block text-sm font-medium text-gray-700 mb-2">
+                    קוד React
+                  </label>
+                  <textarea
+                    id="editedCode"
+                    value={editedCode}
+                    onChange={(e) => setEditedCode(e.target.value)}
+                    className="w-full flex-1 min-h-[600px] p-4 border border-gray-300 rounded-lg font-mono text-sm resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    style={{
+                      fontFamily: 'Menlo, Monaco, "Courier New", monospace',
+                      fontSize: '14px',
+                      lineHeight: '1.5',
+                      direction: 'ltr',
+                      textAlign: 'left',
+                      whiteSpace: 'pre',
+                      overflowWrap: 'normal',
+                      tabSize: 2,
+                    }}
+                    spellCheck={false}
+                    placeholder="הדבק את קוד React כאן..."
+                  />
+                </div>
               </div>
             </>
           ) : (

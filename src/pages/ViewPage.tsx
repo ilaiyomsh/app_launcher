@@ -4,6 +4,24 @@ import { Sandpack } from '@codesandbox/sandpack-react';
 import { getSnippet } from '../services/snippetService';
 import { Loader2, AlertCircle } from 'lucide-react';
 
+// פונקציה עזר לזיהוי שם קומפוננטה
+function extractComponentName(code: string): string | null {
+  const patterns = [
+    /function\s+(\w+)\s*[\(<]/,
+    /const\s+(\w+)\s*=\s*(\(|function|React\.memo|React\.forwardRef)/,
+    /export\s+default\s+function\s+(\w+)/,
+  ];
+  
+  for (const pattern of patterns) {
+    const match = code.match(pattern);
+    if (match && match[1]) {
+      return match[1];
+    }
+  }
+  
+  return null; // אם לא מצאנו, נשתמש ב-'App' כברירת מחדל
+}
+
 function ViewPage() {
   const { id } = useParams<{ id: string }>();
   const [code, setCode] = useState<string | null>(null);
@@ -33,36 +51,7 @@ function ViewPage() {
           
           // אם הקוד לא כולל export default, נוסיף אותו
           if (!processedCode.includes('export default')) {
-            // ננסה למצוא את שם הקומפוננטה הראשית
-            let componentName = 'App';
-            
-            // נבדוק אם יש function App
-            const functionAppMatch = processedCode.match(/function\s+App\s*[\(<]/);
-            if (functionAppMatch) {
-              componentName = 'App';
-            }
-            // נבדוק אם יש const App או const App =
-            else {
-              const constAppMatch = processedCode.match(/const\s+App\s*=/);
-              if (constAppMatch) {
-                componentName = 'App';
-              }
-              // ננסה למצוא function אחרת
-              else {
-                const functionMatch = processedCode.match(/function\s+(\w+)\s*[\(<]/);
-                if (functionMatch && functionMatch[1]) {
-                  componentName = functionMatch[1];
-                } else {
-                  // ננסה למצוא const component
-                  const constMatch = processedCode.match(/const\s+(\w+)\s*=\s*(\(|function|\(props\)|\(\))/);
-                  if (constMatch && constMatch[1]) {
-                    componentName = constMatch[1];
-                  }
-                }
-              }
-            }
-            
-            // נוסיף export default בסוף הקוד
+            const componentName = extractComponentName(processedCode) || 'App';
             processedCode = processedCode + `\n\nexport default ${componentName};`;
             console.log('✅ הוסף export default עבור:', componentName);
           } else {
