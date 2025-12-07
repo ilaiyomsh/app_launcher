@@ -105,10 +105,18 @@ export const searchSnippets = async (searchTerm: string): Promise<Snippet[]> => 
 
 export const updateSnippet = async (id: string, data: Partial<SnippetData>): Promise<void> => {
   const docRef = doc(db, COLLECTION_NAME, id);
-  await updateDoc(docRef, {
-    ...data,
+  
+  // ניקוי של undefined values - Firestore לא מקבל אותם
+  const cleanData: Record<string, any> = {
     updatedAt: Timestamp.now(),
-  });
+  };
+  
+  if (data.name !== undefined) cleanData.name = data.name;
+  if (data.description !== undefined) cleanData.description = data.description || '';
+  if (data.author !== undefined) cleanData.author = data.author || '';
+  if (data.code !== undefined) cleanData.code = data.code;
+  
+  await updateDoc(docRef, cleanData);
 };
 
 export const deleteSnippet = async (id: string): Promise<void> => {

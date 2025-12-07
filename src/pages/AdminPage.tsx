@@ -90,12 +90,23 @@ function AdminPage() {
     }
 
     try {
+      console.log('💾 שומר שינויים:', {
+        id: selectedSnippet.id,
+        name: editedName.trim(),
+        description: editedDescription.trim() || undefined,
+        author: editedAuthor.trim() || undefined,
+        codeLength: editedCode.length,
+      });
+
       await updateSnippet(selectedSnippet.id, {
         name: editedName.trim(),
         description: editedDescription.trim() || undefined,
         author: editedAuthor.trim() || undefined,
         code: editedCode,
       });
+
+      console.log('✅ שמירה הושלמה בהצלחה');
+
       // עדכון הרשימה
       await loadSnippets();
       // עדכון הכלי הנבחר
@@ -103,11 +114,17 @@ function AdminPage() {
       const updatedSnippet = updated.find(s => s.id === selectedSnippet.id);
       if (updatedSnippet) {
         setSelectedSnippet(updatedSnippet);
+        // עדכון השדות הנערכים עם הערכים החדשים
+        setEditedName(updatedSnippet.name || '');
+        setEditedDescription(updatedSnippet.description || '');
+        setEditedAuthor(updatedSnippet.author || '');
+        setEditedCode(updatedSnippet.code || '');
       }
       alert('השינויים נשמרו בהצלחה!');
     } catch (err) {
-      setError('שגיאה בשמירת השינויים');
-      console.error(err);
+      console.error('❌ שגיאה בשמירת השינויים:', err);
+      const errorMessage = err instanceof Error ? err.message : 'שגיאה לא ידועה';
+      setError(`שגיאה בשמירת השינויים: ${errorMessage}`);
     } finally {
       setSaving(false);
     }
