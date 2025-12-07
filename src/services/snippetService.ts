@@ -107,15 +107,26 @@ export const updateSnippet = async (id: string, data: Partial<SnippetData>): Pro
   const docRef = doc(db, COLLECTION_NAME, id);
   
   // ניקוי של undefined values - Firestore לא מקבל אותם
+  // רק שדות שמוגדרים בפועל (לא undefined) יועברו לעדכון
   const cleanData: Record<string, any> = {
     updatedAt: Timestamp.now(),
   };
   
-  if (data.name !== undefined) cleanData.name = data.name;
-  if (data.description !== undefined) cleanData.description = data.description || '';
-  if (data.author !== undefined) cleanData.author = data.author || '';
-  if (data.code !== undefined) cleanData.code = data.code;
+  // רק אם השדה מוגדר (לא undefined), נוסיף אותו לעדכון
+  if (data.name !== undefined && data.name !== null) {
+    cleanData.name = data.name;
+  }
+  if (data.description !== undefined && data.description !== null) {
+    cleanData.description = data.description;
+  }
+  if (data.author !== undefined && data.author !== null) {
+    cleanData.author = data.author;
+  }
+  if (data.code !== undefined && data.code !== null) {
+    cleanData.code = data.code;
+  }
   
+  console.log('📤 מעדכן Firestore עם:', cleanData);
   await updateDoc(docRef, cleanData);
 };
 

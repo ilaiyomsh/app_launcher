@@ -90,20 +90,28 @@ function AdminPage() {
     }
 
     try {
+      // הכנת הנתונים לעדכון - רק שדות שצריכים לעדכן
+      const updateData: Partial<{ name: string; description?: string; author?: string; code: string }> = {
+        name: editedName.trim(),
+        code: editedCode,
+      };
+
+      // הוסף description רק אם יש ערך או אם צריך למחוק אותו (מחרוזת ריקה)
+      if (editedDescription.trim() !== '' || selectedSnippet.description) {
+        updateData.description = editedDescription.trim();
+      }
+
+      // הוסף author רק אם יש ערך או אם צריך למחוק אותו (מחרוזת ריקה)
+      if (editedAuthor.trim() !== '' || selectedSnippet.author) {
+        updateData.author = editedAuthor.trim();
+      }
+
       console.log('💾 שומר שינויים:', {
         id: selectedSnippet.id,
-        name: editedName.trim(),
-        description: editedDescription.trim() || undefined,
-        author: editedAuthor.trim() || undefined,
-        codeLength: editedCode.length,
+        updateData,
       });
 
-      await updateSnippet(selectedSnippet.id, {
-        name: editedName.trim(),
-        description: editedDescription.trim() || undefined,
-        author: editedAuthor.trim() || undefined,
-        code: editedCode,
-      });
+      await updateSnippet(selectedSnippet.id, updateData);
 
       console.log('✅ שמירה הושלמה בהצלחה');
 
