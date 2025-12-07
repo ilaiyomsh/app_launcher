@@ -67,10 +67,54 @@ function CreatePage() {
   };
 
   const handleCopy = async () => {
-    if (createdUrl) {
-      await navigator.clipboard.writeText(createdUrl);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+    if (!createdUrl) return;
+    
+    try {
+      // נסה להשתמש ב-Clipboard API המודרני
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(createdUrl);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } else {
+        // Fallback לשיטה הישנה
+        const textArea = document.createElement('textarea');
+        textArea.value = createdUrl;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+          document.execCommand('copy');
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+        } catch (err) {
+          console.error('שגיאה בהעתקה:', err);
+          alert('לא ניתן להעתיק אוטומטית. הקישור: ' + createdUrl);
+        }
+        document.body.removeChild(textArea);
+      }
+    } catch (err) {
+      console.error('שגיאה בהעתקה:', err);
+      // Fallback נוסף - הצג את הקישור למשתמש
+      const textArea = document.createElement('textarea');
+      textArea.value = createdUrl;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      textArea.style.top = '-999999px';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } catch (fallbackErr) {
+        console.error('שגיאה גם ב-fallback:', fallbackErr);
+        alert('לא ניתן להעתיק אוטומטית. הקישור: ' + createdUrl);
+      }
+      document.body.removeChild(textArea);
     }
   };
 

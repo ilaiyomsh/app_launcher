@@ -34,11 +34,51 @@ function BrowsePage() {
   const handleCopyLink = async (id: string) => {
     const url = getViewUrl(id);
     try {
-      await navigator.clipboard.writeText(url);
-      setCopiedId(id);
-      setTimeout(() => setCopiedId(null), 2000);
+      // נסה להשתמש ב-Clipboard API המודרני
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(url);
+        setCopiedId(id);
+        setTimeout(() => setCopiedId(null), 2000);
+      } else {
+        // Fallback לשיטה הישנה
+        const textArea = document.createElement('textarea');
+        textArea.value = url;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+          document.execCommand('copy');
+          setCopiedId(id);
+          setTimeout(() => setCopiedId(null), 2000);
+        } catch (err) {
+          console.error('שגיאה בהעתקה:', err);
+          alert('לא ניתן להעתיק אוטומטית. הקישור: ' + url);
+        }
+        document.body.removeChild(textArea);
+      }
     } catch (err) {
       console.error('שגיאה בהעתקת הקישור:', err);
+      // Fallback נוסף - שיטה ישנה
+      const textArea = document.createElement('textarea');
+      textArea.value = url;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      textArea.style.top = '-999999px';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        setCopiedId(id);
+        setTimeout(() => setCopiedId(null), 2000);
+      } catch (fallbackErr) {
+        console.error('שגיאה גם ב-fallback:', fallbackErr);
+        alert('לא ניתן להעתיק אוטומטית. הקישור: ' + url);
+      }
+      document.body.removeChild(textArea);
     }
   };
 
