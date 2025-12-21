@@ -218,11 +218,16 @@ function BrowsePage() {
                   {snippet.name}
                 </h3>
 
-                {snippet.description && (
-                  <p className="text-gray-600 mb-4 text-xs sm:text-sm line-clamp-2">
-                    {snippet.description}
-                  </p>
-                )}
+                {/* Description - Always takes space (2 lines) */}
+                <div className="mb-4">
+                  {snippet.description ? (
+                    <p className="text-gray-600 text-xs sm:text-sm line-clamp-2 min-h-[2.5rem] sm:min-h-[2.625rem]">
+                      {snippet.description}
+                    </p>
+                  ) : (
+                    <div className="h-[2.5rem] sm:h-[2.625rem]"></div>
+                  )}
+                </div>
 
                 {/* 2x2 Grid */}
                 <div className="grid grid-cols-2 gap-3 mb-4">
