@@ -1,4 +1,4 @@
-# מדריך כתיבת כלים - Monday App Launcher
+# מדריך כתיבת כלים - Twist's Apps
 
 ## 📋 כללי יסוד
 

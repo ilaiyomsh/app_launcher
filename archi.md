@@ -1,4 +1,4 @@
-מסמך אפיון מערכת: Monday App Launcher & CMS
+מסמך אפיון מערכת: Twist's Apps
 
 גרסה: 1.0
 

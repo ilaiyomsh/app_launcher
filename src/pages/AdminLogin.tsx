@@ -20,26 +20,27 @@ function AdminLogin() {
     setLoading(true);
     try {
       await signInWithGoogle();
-      navigate('/admin');
-    } catch (err) {
-      setError('שגיאה בהתחברות. נסה שוב.');
+      // אין צורך ב-navigate כאן - signInWithRedirect יעשה redirect אוטומטית
+      // המשתמש יועבר חזרה לאפליקציה אחרי ההתחברות
+    } catch (err: any) {
+      setError(`שגיאה בהתחברות: ${err.message || 'נסה שוב'}`);
       console.error('שגיאה בהתחברות:', err);
-    } finally {
       setLoading(false);
     }
+    // לא צריך finally כאן כי ה-redirect יקרה
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-      <div className="max-w-md w-full bg-white rounded-lg shadow-md p-8">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
-            <Lock size={32} className="text-blue-600" />
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-8">
+      <div className="max-w-md w-full bg-white rounded-lg shadow-md p-6 sm:p-8">
+        <div className="text-center mb-6 sm:mb-8">
+          <div className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-blue-100 rounded-full mb-4">
+            <Lock size={24} className="sm:w-8 sm:h-8 text-blue-600" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
             התחברות למנהל מערכת
           </h1>
-          <p className="text-gray-600 mt-2">
+          <p className="text-gray-600 mt-2 text-sm sm:text-base">
             הזן סיסמת מנהל כדי להמשיך
           </p>
         </div>
@@ -54,7 +55,7 @@ function AdminLogin() {
           <button
             onClick={handleGoogleSignIn}
             disabled={loading}
-            className="w-full px-6 py-3 bg-white border-2 border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-semibold flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full px-4 sm:px-6 py-3 bg-white border-2 border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-semibold flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
           >
             {loading ? (
               <>

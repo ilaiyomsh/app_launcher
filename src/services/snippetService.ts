@@ -11,7 +11,7 @@ import {
   Timestamp 
 } from 'firebase/firestore';
 import { db, auth } from '../config/firebase';
-import { Snippet, SnippetData } from '../types';
+import { Snippet, SnippetData, FilterOptions } from '../types';
 
 const COLLECTION_NAME = 'snippets';
 
@@ -28,6 +28,8 @@ export const createSnippet = async (data: Omit<SnippetData, 'author'>): Promise<
     description: data.description || '',
     code: data.code,
     author: user.email || user.displayName || 'Unknown',
+    category: data.category || null,
+    tags: data.tags || [],
     createdAt: now,
     updatedAt: now,
   });
@@ -53,6 +55,8 @@ export const getSnippet = async (id: string): Promise<Snippet | null> => {
     createdAt: data.createdAt.toDate(),
     updatedAt: data.updatedAt.toDate(),
     author: data.author || 'Unknown', // Fallback לכלים ישנים
+    category: data.category || undefined,
+    tags: data.tags || [],
   };
 };
 
@@ -73,6 +77,8 @@ export const getAllSnippets = async (): Promise<Snippet[]> => {
       createdAt: data.createdAt.toDate(),
       updatedAt: data.updatedAt.toDate(),
       author: data.author || 'Unknown', // Fallback לכלים ישנים
+      category: data.category || undefined,
+      tags: data.tags || [],
     };
   });
 };
@@ -117,8 +123,92 @@ export const updateSnippet = async (id: string, data: Partial<SnippetData>): Pro
   if (data.code !== undefined && data.code !== null) {
     cleanData.code = data.code;
   }
+  if (data.category !== undefined) {
+    cleanData.category = data.category || null;
+  }
+  if (data.tags !== undefined && data.tags !== null) {
+    cleanData.tags = data.tags;
+  }
   
   await updateDoc(docRef, cleanData);
+};
+
+export const filterSnippets = async (options: FilterOptions): Promise<Snippet[]> => {
+  // קבל את כל הכלים
+  const allSnippets = await getAllSnippets();
+
+  // החל סינונים
+  let filtered = allSnippets;
+
+  // סינון לפי חיפוש חופשי
+  if (options.search) {
+    const lowerSearch = options.search.toLowerCase().trim();
+    filtered = filtered.filter((snippet) =>
+      snippet.name.toLowerCase().includes(lowerSearch) ||
+      (snippet.description && snippet.description.toLowerCase().includes(lowerSearch)) ||
+      (snippet.author && snippet.author.toLowerCase().includes(lowerSearch))
+    );
+  }
+
+  // סינון לפי קטגוריות (מרובות)
+  if (options.categories && options.categories.length > 0) {
+    filtered = filtered.filter((snippet) =>
+      options.categories!.includes(snippet.category || '')
+    );
+  }
+
+  // סינון לפי תגיות
+  if (options.tags && options.tags.length > 0) {
+    filtered = filtered.filter((snippet) =>
+      options.tags!.some((tag) => snippet.tags.includes(tag))
+    );
+  }
+
+  // סינון לפי יוצרים (מרובים)
+  if (options.authors && options.authors.length > 0) {
+    filtered = filtered.filter((snippet) =>
+      options.authors!.includes(snippet.author)
+    );
+  }
+
+  // מיון
+  const sortBy = options.sortBy || 'updatedAt';
+  const sortDirection = options.sortDirection || 'desc';
+
+  filtered.sort((a, b) => {
+    let aValue: any;
+    let bValue: any;
+
+    switch (sortBy) {
+      case 'updatedAt':
+        aValue = a.updatedAt.getTime();
+        bValue = b.updatedAt.getTime();
+        break;
+      case 'createdAt':
+        aValue = a.createdAt.getTime();
+        bValue = b.createdAt.getTime();
+        break;
+      case 'name':
+        aValue = a.name.toLowerCase();
+        bValue = b.name.toLowerCase();
+        break;
+      case 'author':
+        aValue = a.author.toLowerCase();
+        bValue = b.author.toLowerCase();
+        break;
+      default:
+        aValue = a.updatedAt.getTime();
+        bValue = b.updatedAt.getTime();
+    }
+
+    if (sortDirection === 'asc') {
+      return aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
+    } else {
+      return aValue < bValue ? 1 : aValue > bValue ? -1 : 0;
+    }
+  });
+
+  return filtered;
 };
 
 export const deleteSnippet = async (id: string): Promise<void> => {

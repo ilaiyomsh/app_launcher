@@ -25,6 +25,7 @@ function extractComponentName(code: string): string | null {
 function ViewPage() {
   const { id } = useParams<{ id: string }>();
   const [code, setCode] = useState<string | null>(null);
+  const [snippetName, setSnippetName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -41,6 +42,9 @@ function ViewPage() {
         if (!snippet) {
           setError('כלי לא נמצא');
         } else {
+          // שמירת שם הכלי לעדכון כותרת החלון
+          setSnippetName(snippet.name);
+          
           let processedCode = snippet.code.trim();
           
           // תיקון: אם הקוד מתחיל ב-unction במקום function, נוסיף f
@@ -66,6 +70,20 @@ function ViewPage() {
 
     fetchSnippet();
   }, [id]);
+
+  // עדכון כותרת החלון עם שם הכלי
+  useEffect(() => {
+    if (snippetName) {
+      document.title = snippetName;
+    } else {
+      document.title = "Twist's Apps";
+    }
+
+    // ניקוי בעת יציאה מהדף
+    return () => {
+      document.title = "Twist's Apps";
+    };
+  }, [snippetName]);
 
   if (loading) {
     return (

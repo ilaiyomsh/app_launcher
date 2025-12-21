@@ -1,4 +1,4 @@
-# Monday App Launcher & CMS
+# Twist's Apps
 
 פלטפורמת Launchpad להפיכת קוד React מ-Gemini Canvas ל-URL פעיל להטמעה ב-Monday.com.
 

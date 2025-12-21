@@ -28,6 +28,61 @@ service cloud.firestore {
             || request.auth.token.email == 'ilai@twyst.co.il'
             || request.auth.token.email.matches('.*@yourdomain\\.com$')); // Admin emails נוספים
     }
+
+    match /categories/{categoryId} {
+      // קריאה - כולם יכולים לקרוא קטגוריות (public)
+      // גם אם collection לא קיים, הקריאה תחזור array ריק
+      allow read: if true;
+      
+      // יצירה - רק משתמשים מחוברים יכולים ליצור קטגוריות
+      // ה-createdBy חייב להיות שווה למייל של המשתמש המחובר
+      allow create: if request.auth != null
+        && request.resource.data.name is string
+        && request.resource.data.color is string
+        && request.resource.data.createdBy is string
+        && request.resource.data.createdBy == request.auth.token.email;
+      
+      // עדכון - רק יוצר הקטגוריה או Admin יכולים לעדכן
+      allow update: if request.auth != null
+        && (resource.data.createdBy == request.auth.token.email
+            || request.auth.token.email == 'ilai@twyst.co.il'
+            || request.auth.token.email.matches('.*@yourdomain\\.com$'));
+      
+      // מחיקה - רק יוצר הקטגוריה או Admin יכולים למחוק
+      allow delete: if request.auth != null
+        && (resource.data.createdBy == request.auth.token.email
+            || request.auth.token.email == 'ilai@twyst.co.il'
+            || request.auth.token.email.matches('.*@yourdomain\\.com$'));
+    }
+
+    match /tags/{tagId} {
+      // קריאה - כולם יכולים לקרוא תגיות (public)
+      // גם אם collection לא קיים, הקריאה תחזור array ריק
+      allow read: if true;
+      
+      // יצירה - רק משתמשים מחוברים יכולים ליצור תגיות
+      // ה-createdBy חייב להיות שווה למייל של המשתמש המחובר
+      allow create: if request.auth != null
+        && request.resource.data.name is string
+        && request.resource.data.createdBy is string
+        && request.resource.data.createdBy == request.auth.token.email;
+      
+      // עדכון - רק יוצר התגית או Admin יכולים לעדכן
+      allow update: if request.auth != null
+        && (resource.data.createdBy == request.auth.token.email
+            || request.auth.token.email == 'ilai@twyst.co.il'
+            || request.auth.token.email.matches('.*@yourdomain\\.com$'));
+      
+      // מחיקה - רק יוצר התגית או Admin יכולים למחוק
+      allow delete: if request.auth != null
+        && (resource.data.createdBy == request.auth.token.email
+            || request.auth.token.email == 'ilai@twyst.co.il'
+            || request.auth.token.email.matches('.*@yourdomain\\.com$'));
+    }
+
+    // Catch-all: deny everything else by default
+    match /{document=**} {
+      allow read, write: if false;
+    }
   }
 }
-
