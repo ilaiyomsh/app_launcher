@@ -32,7 +32,6 @@ export function CategorySelect({
   const [isCreating, setIsCreating] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [selectedColor, setSelectedColor] = useState(DEFAULT_COLORS[0]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadCategories();
@@ -44,8 +43,6 @@ export function CategorySelect({
       setCategories(data);
     } catch (err) {
       console.error('שגיאה בטעינת קטגוריות:', err);
-    } finally {
-      setLoading(false);
     }
   };
 

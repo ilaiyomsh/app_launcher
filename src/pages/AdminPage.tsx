@@ -5,7 +5,7 @@ import { getAllCategories } from '../services/categoryService';
 import { getAllTags } from '../services/tagService';
 import { validateReactCode } from '../utils/codeValidator';
 import { useAuth } from '../contexts/AuthContext';
-import { Snippet, Category, Tag } from '../types';
+import { Snippet } from '../types';
 import { Search, Trash2, Save, LogOut, Loader2, ExternalLink, Grid3x3, Menu, X, Type, Copy, Trash, Plus } from 'lucide-react';
 import { CategorySelect } from '../components/CategorySelect';
 import { TagSelect } from '../components/TagSelect';
@@ -14,8 +14,6 @@ function AdminPage() {
   const navigate = useNavigate();
   const { user, signOut, isAdmin, loading: authLoading } = useAuth();
   const [snippets, setSnippets] = useState<Snippet[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [allTags, setAllTags] = useState<Tag[]>([]);
   const [selectedSnippet, setSelectedSnippet] = useState<Snippet | null>(null);
   const [editedName, setEditedName] = useState('');
   const [editedDescription, setEditedDescription] = useState('');
@@ -66,14 +64,13 @@ function AdminPage() {
   const loadSnippets = async () => {
     setLoading(true);
     try {
-      const [snippetsData, categoriesData, tagsData] = await Promise.all([
-        getAllSnippets(),
+      const snippetsData = await getAllSnippets();
+      setSnippets(snippetsData);
+      // Load categories and tags in background (not used directly but needed for components)
+      await Promise.all([
         getAllCategories(),
         getAllTags(),
       ]);
-      setSnippets(snippetsData);
-      setCategories(categoriesData);
-      setAllTags(tagsData);
     } catch (err) {
       setError('שגיאה בטעינת הכלים');
       console.error(err);

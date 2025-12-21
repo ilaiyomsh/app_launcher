@@ -8,7 +8,6 @@ import { CategorySelect } from '../components/CategorySelect';
 import { TagSelect } from '../components/TagSelect';
 import { getAllCategories } from '../services/categoryService';
 import { getAllTags } from '../services/tagService';
-import { Category, Tag } from '../types';
 
 function CreatePage() {
   const { user } = useAuth();
@@ -17,8 +16,6 @@ function CreatePage() {
   const [code, setCode] = useState('');
   const [category, setCategory] = useState<string | undefined>();
   const [tags, setTags] = useState<string[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [allTags, setAllTags] = useState<Tag[]>([]);
   const [loading, setLoading] = useState(false);
   const [createdUrl, setCreatedUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -30,12 +27,11 @@ function CreatePage() {
 
   const loadMetadata = async () => {
     try {
-      const [categoriesData, tagsData] = await Promise.all([
+      // Load categories and tags in background (not used directly but needed for components)
+      await Promise.all([
         getAllCategories(),
         getAllTags(),
       ]);
-      setCategories(categoriesData);
-      setAllTags(tagsData);
     } catch (err) {
       console.error('שגיאה בטעינת מטא-דטה:', err);
     }

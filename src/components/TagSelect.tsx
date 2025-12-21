@@ -19,7 +19,6 @@ export function TagSelect({
   const [tags, setTags] = useState<Tag[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [loading, setLoading] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -46,8 +45,6 @@ export function TagSelect({
       setTags(data);
     } catch (err) {
       console.error('שגיאה בטעינת תגיות:', err);
-    } finally {
-      setLoading(false);
     }
   };
 

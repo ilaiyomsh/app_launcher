@@ -1,6 +1,5 @@
 import { Search, RotateCcw, ChevronDown } from 'lucide-react';
 import { useRef, useEffect, useState } from 'react';
-import { CategorySelect } from './CategorySelect';
 import { TagSelect } from './TagSelect';
 import { FilterOptions, Category, Tag } from '../types';
 
@@ -16,7 +15,7 @@ export function FilterBar({
   filters,
   onFiltersChange,
   categories,
-  tags,
+  tags: _tags,
   authors,
 }: FilterBarProps) {
   const [openDropdown, setOpenDropdown] = useState<'categories' | 'authors' | null>(null);

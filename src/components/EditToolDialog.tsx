@@ -17,8 +17,8 @@ interface EditToolDialogProps {
 
 export function EditToolDialog({
   snippet,
-  categories,
-  tags,
+  categories: _categories,
+  tags: _tags,
   onClose,
   onSave,
   onDelete,
