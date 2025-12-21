@@ -351,6 +351,7 @@ function AdminPage() {
                 onChange={(e) => handleSearch(e.target.value)}
                 placeholder="חפש כלי..."
                 className="w-full px-3 sm:px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                style={{ paddingRight: 32 }} // 16px (text spacing) + 24px (icon width+gap) for a total of 40px
               />
             </div>
           </div>
@@ -452,7 +453,9 @@ function AdminPage() {
                       editedName === selectedSnippet.name &&
                       editedDescription === (selectedSnippet.description || '') &&
                       editedAuthor === (selectedSnippet.author || '') &&
-                      editedCode === selectedSnippet.code
+                      editedCode === selectedSnippet.code &&
+                      editedCategory === selectedSnippet.category &&
+                      JSON.stringify(editedTags.sort()) === JSON.stringify((selectedSnippet.tags || []).sort())
                     )}
                     className="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors text-sm sm:text-base"
                   >
@@ -526,6 +529,7 @@ function AdminPage() {
                       value={editedCategory}
                       onChange={setEditedCategory}
                       allowCreate={canEditSnippet(selectedSnippet)}
+                      allowDelete={isAdmin}
                     />
                   </div>
 
@@ -538,6 +542,7 @@ function AdminPage() {
                       values={editedTags}
                       onChange={setEditedTags}
                       allowCreate={canEditSnippet(selectedSnippet)}
+                      allowDelete={isAdmin}
                     />
                   </div>
                 </div>

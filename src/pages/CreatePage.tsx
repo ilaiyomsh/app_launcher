@@ -10,7 +10,7 @@ import { getAllCategories } from '../services/categoryService';
 import { getAllTags } from '../services/tagService';
 
 function CreatePage() {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [code, setCode] = useState('');
@@ -359,6 +359,7 @@ function CreatePage() {
                   value={category}
                   onChange={setCategory}
                   allowCreate={true}
+                  allowDelete={isAdmin}
                 />
               </div>
 
@@ -370,6 +371,7 @@ function CreatePage() {
                   values={tags}
                   onChange={setTags}
                   allowCreate={true}
+                  allowDelete={isAdmin}
                 />
               </div>
             </div>

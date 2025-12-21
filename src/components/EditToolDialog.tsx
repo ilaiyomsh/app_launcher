@@ -209,6 +209,7 @@ export function EditToolDialog({
                   value={editedCategory}
                   onChange={setEditedCategory}
                   allowCreate={true}
+                  allowDelete={isAdmin}
                 />
               </div>
 
@@ -220,6 +221,7 @@ export function EditToolDialog({
                   values={editedTags}
                   onChange={setEditedTags}
                   allowCreate={true}
+                  allowDelete={isAdmin}
                 />
               </div>
             </div>

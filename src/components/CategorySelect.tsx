@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { ChevronDown, Plus } from 'lucide-react';
-import { getAllCategories, createCategory } from '../services/categoryService';
+import { ChevronDown, Plus, Trash2 } from 'lucide-react';
+import { getAllCategories, createCategory, deleteCategory } from '../services/categoryService';
 import { Category } from '../types';
 
 interface CategorySelectProps {
@@ -8,6 +8,7 @@ interface CategorySelectProps {
   onChange: (categoryId: string | undefined) => void;
   placeholder?: string;
   allowCreate?: boolean;
+  allowDelete?: boolean;
 }
 
 const DEFAULT_COLORS = [
@@ -26,6 +27,7 @@ export function CategorySelect({
   onChange,
   placeholder = 'בחר קטגוריה',
   allowCreate = true,
+  allowDelete = false,
 }: CategorySelectProps) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -69,6 +71,25 @@ export function CategorySelect({
     }
   };
 
+  const handleDeleteCategory = async (categoryId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!confirm('האם אתה בטוח שברצונך למחוק את הקטגוריה הזו?')) {
+      return;
+    }
+
+    try {
+      await deleteCategory(categoryId);
+      setCategories(categories.filter((c) => c.id !== categoryId));
+      // אם הקטגוריה שנמחקה הייתה נבחרת, נקה את הבחירה
+      if (value === categoryId) {
+        onChange(undefined);
+      }
+    } catch (err) {
+      console.error('שגיאה במחיקת קטגוריה:', err);
+      alert('שגיאה במחיקת הקטגוריה');
+    }
+  };
+
   const selectedCategory = categories.find((c) => c.id === value);
 
   return (
@@ -102,20 +123,33 @@ export function CategorySelect({
               <span className="text-gray-500">ללא קטגוריה</span>
             </button>
             {categories.map((category) => (
-              <button
+              <div
                 key={category.id}
-                onClick={() => {
-                  onChange(category.id);
-                  setIsOpen(false);
-                }}
-                className="w-full text-right px-4 py-2 hover:bg-gray-100 transition-colors flex items-center justify-end gap-2"
+                className="w-full flex items-center hover:bg-gray-100 transition-colors group border-b border-gray-200 last:border-b-0"
               >
-                {category.name}
-                <div
-                  className="w-3 h-3 rounded-full flex-shrink-0"
-                  style={{ backgroundColor: category.color }}
-                />
-              </button>
+                <button
+                  onClick={() => {
+                    onChange(category.id);
+                    setIsOpen(false);
+                  }}
+                  className="flex-1 text-right px-4 py-2 flex items-center justify-end gap-2"
+                >
+                  {category.name}
+                  <div
+                    className="w-3 h-3 rounded-full flex-shrink-0"
+                    style={{ backgroundColor: category.color }}
+                  />
+                </button>
+                {allowDelete && (
+                  <button
+                    onClick={(e) => handleDeleteCategory(category.id, e)}
+                    className="p-2 text-red-600 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
+                    title="מחק קטגוריה"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                )}
+              </div>
             ))}
           </div>
 

@@ -104,7 +104,7 @@ export function FilterBar({
               type="text"
               value={filters.search || ''}
               onChange={(e) => handleSearchChange(e.target.value)}
-              placeholder="חיפוש לפי שם, תיאור, יוצר..."
+              placeholder="חפש לפי שם ותיאור"
               className="w-full pl-4 pr-10 py-2 border border-gray-300 rounded-lg text-right placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>

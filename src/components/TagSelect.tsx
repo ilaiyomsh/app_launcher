@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { X, Plus } from 'lucide-react';
-import { getAllTags, createTag } from '../services/tagService';
+import { X, Plus, Trash2 } from 'lucide-react';
+import { getAllTags, createTag, deleteTag } from '../services/tagService';
 import { Tag } from '../types';
 
 interface TagSelectProps {
@@ -8,6 +8,7 @@ interface TagSelectProps {
   onChange: (tagIds: string[]) => void;
   placeholder?: string;
   allowCreate?: boolean;
+  allowDelete?: boolean;
 }
 
 export function TagSelect({
@@ -15,6 +16,7 @@ export function TagSelect({
   onChange,
   placeholder = 'בחר תגיות',
   allowCreate = true,
+  allowDelete = false,
 }: TagSelectProps) {
   const [tags, setTags] = useState<Tag[]>([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -77,6 +79,25 @@ export function TagSelect({
     }
   };
 
+  const handleDeleteTag = async (tagId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!confirm('האם אתה בטוח שברצונך למחוק את התגית הזו?')) {
+      return;
+    }
+
+    try {
+      await deleteTag(tagId);
+      setTags(tags.filter((t) => t.id !== tagId));
+      // הסר את התגית מהבחירות אם היא נבחרה
+      if (values.includes(tagId)) {
+        handleRemoveTag(tagId);
+      }
+    } catch (err) {
+      console.error('שגיאה במחיקת תגית:', err);
+      alert('שגיאה במחיקת התגית');
+    }
+  };
+
   const selectedTags = tags.filter((tag) => values.includes(tag.id));
   const filteredTags = tags.filter(
     (tag) =>
@@ -131,16 +152,29 @@ export function TagSelect({
           <div className="max-h-48 overflow-y-auto">
             {/* תגיות זמינות */}
             {filteredTags.map((tag) => (
-              <button
+              <div
                 key={tag.id}
-                onClick={() => {
-                  handleAddTag(tag.id);
-                  setSearchTerm('');
-                }}
-                className="w-full text-right px-4 py-2 hover:bg-gray-100 transition-colors border-b border-gray-200 last:border-b-0"
+                className="w-full flex items-center hover:bg-gray-100 transition-colors group border-b border-gray-200 last:border-b-0"
               >
-                {tag.name}
-              </button>
+                <button
+                  onClick={() => {
+                    handleAddTag(tag.id);
+                    setSearchTerm('');
+                  }}
+                  className="flex-1 text-right px-4 py-2"
+                >
+                  {tag.name}
+                </button>
+                {allowDelete && (
+                  <button
+                    onClick={(e) => handleDeleteTag(tag.id, e)}
+                    className="p-2 text-red-600 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
+                    title="מחק תגית"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                )}
+              </div>
             ))}
 
             {/* אופציה ליצירת תגית חדשה */}
